@@ -33,6 +33,27 @@ client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix="!")
 
 
+@bot.event
+async def on_ready():
+    print(f"{bot.user} has connected to Discord!")
+    guild = discord.utils.get(bot.guilds, name=GUILD)
+    print(
+        f"{bot.user} is connected to the following guild:\n"
+        f"{guild.name}(id: {guild.id})"
+    )
+
+
+# @bot.event
+# async def on_message(message):
+#     if message.author == bot.user:
+#         return
+#     if message.author.name == "Lottli":
+#         # print("This is jeff")
+#         if "What do you think about that boyo-bot?" in message.content:
+#             print("Fuck you and your class.")
+#             await message.channel.send("Fuck you and your class.")
+
+
 @bot.command(name="boyo-bot")
 async def fk(ctx):
     await ctx.send("fuck off")
@@ -65,6 +86,22 @@ async def pick(ctx, *args):
     except Exception as e:
         print(e)
         await ctx.send("fuck off")
+
+
+@bot.command(name="spongebobify")
+async def spongebobify(ctx):
+    try:
+        if ctx.message.reference is not None:
+            reply_to = ctx.message.reference
+            msg = reply_to.content
+            # msg = msg.split(" ", 1)[1]
+            new = "".join(random.choice((str.upper, str.lower))(x) for x in msg)
+            print(msg)
+            print(new)
+            await reply_to.reply(new)
+    except Exception as e:
+        print(e)
+        ctx.send("fuck off")
 
 
 # client.run(TOKEN)

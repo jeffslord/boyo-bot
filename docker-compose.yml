@@ -1,0 +1,6 @@
+version: "3"
+services:
+  boyo-bot:
+    build: .
+    container_name: boyo-bot
+    restart: unless-stopped
