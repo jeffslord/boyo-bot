@@ -13,4 +13,4 @@ RUN pipenv install --deploy --system
 
 COPY . .
 
-CMD [ "python", "./boyo-bot.py" ]
+CMD ["sh", "scripts/run.sh"]
