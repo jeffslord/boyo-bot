@@ -92,6 +92,17 @@ async def spongebobify(ctx):
         print(e)
         ctx.send("fuck off")
 
+@bot.command(name="announce")
+async def announce(ctx, *args):
+    try:
+        if ctx.message.author.name != "Lottli":
+            return
+        text = utils.get_string_after_command(args)
+        channel = bot.get_channel(867586030508834837)
+        await channel.send(text)
+    except Exeption as e:
+        print(e)
+
 
 @bot.event
 async def on_message(message):
