@@ -38,7 +38,7 @@ async def on_message(message):
     #     await message.reply(gpt_response)
     else:
         if (datetime.now() - LAST_AUTO_REPLY_TIME).total_seconds() > 15:
-            gpt_response = utils.get_gpt(message.content)
+            gpt_response = utils.get_gpt("Reply to this: " + message.content)
             await message.reply(gpt_response)
     print(f"Processing request from: {str(message.author)}")
     try:
