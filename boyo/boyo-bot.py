@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import random
 import boyo.utils as utils
 from datetime import datetime, timedelta
+import re
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN", "")
@@ -38,7 +39,10 @@ async def on_message(message):
     #     await message.reply(gpt_response)
     else:
         if (datetime.now() - bot.LAST_AUTO_REPLY_TIME).total_seconds() > 15:
-            gpt_response = utils.get_gpt("Reply to this: " + message.content)
+            gpt_message: str = "Reply to this: " + message.content
+            gpt_message = gpt_message.replace("boyo-bot", "you")
+            gpt_message = gpt_message.replace("boyo", "you")
+            gpt_response = utils.get_gpt(gpt_message)
             bot.LAST_AUTO_REPLY_TIME = datetime.now()
             await message.reply(gpt_response)
     print(f"Processing request from: {str(message.author)}")
