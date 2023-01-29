@@ -10,12 +10,12 @@ TOKEN = os.getenv("DISCORD_TOKEN", "")
 GUILD = os.getenv("DISCORD_SERVER", "")
 # EXCLUDED_CHANNELS("845849148141862948")
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.members = True
 
-client = discord.Client(intents=intents)
+# client = discord.Client(intents=intents)
 
-bot = commands.Bot(command_prefix="!")
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 
 @bot.event
@@ -23,6 +23,29 @@ async def on_ready():
     print(f"{bot.user} has connected to Discord!")
     guild = discord.utils.get(bot.guilds, name=GUILD)
     print(f"{bot.user} is connected to the following guild:\n" f"{guild.name}(id: {guild.id})")
+
+
+@bot.event
+async def on_message(message):
+    if message.author == bot.user:
+        print(f"Skipping request from: {str(message.author)}")
+        return
+    # elif message.author.name == "Lottli":
+    # try:
+    print(f"Processing request from: {str(message.author)}")
+    # # text = utils.get_string_after_command(message.content)
+    # sentiment = utils.text_sentiment(message.content)[0]
+    # print(sentiment)
+    # if "("My advanced AI has detected negativity in your message. I hope you are well.")
+    # except Exception as e:
+    #     #     await message.reply
+    #     print(e)
+    #     message.send("fuck off")
+    # finally:
+    try:
+        await bot.process_commands(message)
+    except Exception as e:
+        print(e)
 
 
 @bot.command(name="boyo-bot")
@@ -57,6 +80,7 @@ async def boyo_short(ctx, *args):
 async def boyo_gpt(ctx, *args):
     try:
         text = utils.get_string_after_command(args)
+        print(f"Sending to gpt: {text}")
         gpt_response = utils.get_gpt(text)
         await ctx.reply(gpt_response)
     except Exception as e:
@@ -111,24 +135,6 @@ async def announce(ctx, *args):
         await channel.send(text)
     except Exception as e:
         print(e)
-
-
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-    # elif message.author.name == "Lottli":
-    try:
-        # text = utils.get_string_after_command(message.content)
-        sentiment = utils.text_sentiment(message.content)[0]
-        print(sentiment)
-        if "negative" in sentiment.lower():
-            await message.reply("My advanced AI has detected negativity in your message. I hope you are well.")
-    except Exception as e:
-        print(e)
-        message.send("fuck off")
-    finally:
-        await bot.process_commands(message)
 
 
 bot.run(TOKEN)
