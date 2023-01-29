@@ -38,7 +38,9 @@ async def on_message(message):
     #     gpt_response = utils.get_gpt(message.content)
     #     await message.reply(gpt_response)
     else:
-        if (datetime.now() - bot.LAST_AUTO_REPLY_TIME).total_seconds() > 15:
+        seconds_since_last_message = datetime.now() - bot.LAST_AUTO_REPLY_TIME
+        print(seconds_since_last_message)
+        if seconds_since_last_message.total_seconds() > 15:
             gpt_message: str = "Reply to this: " + message.content
             gpt_message = gpt_message.replace("boyo-bot", "you")
             gpt_message = gpt_message.replace("boyo", "you")
