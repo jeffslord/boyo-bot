@@ -18,7 +18,7 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-LAST_AUTO_REPLY_TIME = datetime.now() - timedelta(minutes=1)
+bot.LAST_AUTO_REPLY_TIME = datetime.now() - timedelta(minutes=1)
 
 
 @bot.event
@@ -37,8 +37,9 @@ async def on_message(message):
     #     gpt_response = utils.get_gpt(message.content)
     #     await message.reply(gpt_response)
     else:
-        if (datetime.now() - LAST_AUTO_REPLY_TIME).total_seconds() > 15:
+        if (datetime.now() - bot.LAST_AUTO_REPLY_TIME).total_seconds() > 15:
             gpt_response = utils.get_gpt("Reply to this: " + message.content)
+            bot.LAST_AUTO_REPLY_TIME = datetime.now()
             await message.reply(gpt_response)
     print(f"Processing request from: {str(message.author)}")
     try:
