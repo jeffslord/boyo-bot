@@ -4,6 +4,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import random
 import boyo.utils as utils
+from datetime import datetime, timedelta
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN", "")
@@ -16,6 +17,8 @@ intents.members = True
 # client = discord.Client(intents=intents)
 
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+LAST_AUTO_REPLY_TIME = datetime.now() - timedelta(minutes=1)
 
 
 @bot.event
@@ -30,7 +33,13 @@ async def on_message(message):
     if message.author == bot.user:
         print(f"Skipping request from: {str(message.author)}")
         return
-    # elif message.author.name == "Lottli":
+    elif "Lottli" in str(message.author.name):
+        gpt_response = utils.get_gpt(message.content)
+        await message.reply(gpt_response)
+    else:
+        if (datetime.now() - LAST_AUTO_REPLY_TIME).total_seconds() > 15:
+            gpt_response = utils.get_gpt(message.content)
+            await message.reply(gpt_response)
     # try:
     print(f"Processing request from: {str(message.author)}")
     # # text = utils.get_string_after_command(message.content)
