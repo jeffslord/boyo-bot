@@ -43,6 +43,7 @@ async def on_message(message):
         if seconds_since_last_message.total_seconds() > 15:
             gpt_message: str = "Reply to this: " + message.content
             gpt_message = gpt_message.replace("boyo-bot", "you")
+            gpt_message = gpt_message.replace("boyo bot", "you")
             gpt_message = gpt_message.replace("boyo", "you")
             gpt_response = utils.get_gpt(gpt_message)
             bot.LAST_AUTO_REPLY_TIME = datetime.now()
