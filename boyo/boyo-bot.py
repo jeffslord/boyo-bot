@@ -33,24 +33,14 @@ async def on_message(message):
     if message.author == bot.user:
         print(f"Skipping request from: {str(message.author)}")
         return
-    elif "Lottli" in str(message.author.name):
-        gpt_response = utils.get_gpt(message.content)
-        await message.reply(gpt_response)
+    # elif "Lottli" in str(message.author.name):
+    #     gpt_response = utils.get_gpt(message.content)
+    #     await message.reply(gpt_response)
     else:
         if (datetime.now() - LAST_AUTO_REPLY_TIME).total_seconds() > 15:
             gpt_response = utils.get_gpt(message.content)
             await message.reply(gpt_response)
-    # try:
     print(f"Processing request from: {str(message.author)}")
-    # # text = utils.get_string_after_command(message.content)
-    # sentiment = utils.text_sentiment(message.content)[0]
-    # print(sentiment)
-    # if "("My advanced AI has detected negativity in your message. I hope you are well.")
-    # except Exception as e:
-    #     #     await message.reply
-    #     print(e)
-    #     message.send("fuck off")
-    # finally:
     try:
         await bot.process_commands(message)
     except Exception as e:
