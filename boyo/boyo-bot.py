@@ -6,8 +6,8 @@ import random
 import boyo.utils as utils
 
 load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
-GUILD = os.getenv("DISCORD_SERVER")
+TOKEN = os.getenv("DISCORD_TOKEN", "")
+GUILD = os.getenv("DISCORD_SERVER", "")
 # EXCLUDED_CHANNELS("845849148141862948")
 
 intents = discord.Intents.default()
@@ -22,10 +22,7 @@ bot = commands.Bot(command_prefix="!")
 async def on_ready():
     print(f"{bot.user} has connected to Discord!")
     guild = discord.utils.get(bot.guilds, name=GUILD)
-    print(
-        f"{bot.user} is connected to the following guild:\n"
-        f"{guild.name}(id: {guild.id})"
-    )
+    print(f"{bot.user} is connected to the following guild:\n" f"{guild.name}(id: {guild.id})")
 
 
 @bot.command(name="boyo-bot")
@@ -54,6 +51,17 @@ async def boyo_short(ctx, *args):
     except Exception as e:
         print(e)
         await ctx.reply("fuck off")
+
+
+@bot.command(name="boyo-gpt")
+async def boyo_gpt(ctx, *args):
+    try:
+        text = utils.get_string_after_command(args)
+        gpt_response = utils.get_gpt(text)
+        await ctx.reply(gpt_response)
+    except Exception as e:
+        print(e)
+        await ctx.reply("Oops something went wrong.")
 
 
 @bot.command(name="pick")
@@ -92,6 +100,7 @@ async def spongebobify(ctx):
         print(e)
         ctx.send("fuck off")
 
+
 @bot.command(name="announce")
 async def announce(ctx, *args):
     try:
@@ -100,7 +109,7 @@ async def announce(ctx, *args):
         text = utils.get_string_after_command(args)
         channel = bot.get_channel(867586030508834837)
         await channel.send(text)
-    except Exeption as e:
+    except Exception as e:
         print(e)
 
 
@@ -114,9 +123,7 @@ async def on_message(message):
         sentiment = utils.text_sentiment(message.content)[0]
         print(sentiment)
         if "negative" in sentiment.lower():
-            await message.reply(
-                "My advanced AI has detected negativity in your message. I hope you are well."
-            )
+            await message.reply("My advanced AI has detected negativity in your message. I hope you are well.")
     except Exception as e:
         print(e)
         message.send("fuck off")

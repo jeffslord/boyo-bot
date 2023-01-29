@@ -1,7 +1,10 @@
 import requests
 import os
+import openai
 
-DEEPAI_API = os.getenv("DEEPAI_API")
+DEEPAI_API = os.getenv("DEEPAI_API", "")
+OPEN_API = os.getenv("OPEN_API", "")
+openai.api_key = OPEN_API
 
 
 def get_string_after_command(args):
@@ -56,3 +59,16 @@ def text_to_image(text):
     )
     print(res.json())
     return res.json()
+
+
+def get_gpt(prompt: str):
+    completion = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=1024,
+        n=1,
+        stop=None,
+        temperature=0.6,
+    )
+    text_response = completion.choices[0].text
+    return text_response
