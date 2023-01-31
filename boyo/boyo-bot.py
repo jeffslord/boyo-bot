@@ -20,6 +20,7 @@ intents.members = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 bot.LAST_AUTO_REPLY_TIME = datetime.now() - timedelta(minutes=1)
+bot.IS_RESPONDING = False
 
 
 @bot.event
@@ -44,16 +45,18 @@ async def on_message(message):
     #     gpt_response = utils.get_gpt(message.content)
     #     await message.reply(gpt_response)
     else:
-        await asyncio.sleep(random.randint(2, 5))
-        async with message.channel.typing():
-            gpt_prompt: str = utils.embellish_gpt_prompt(
-                message_text, message_author_display_name
-            )
-            gpt_response = utils.get_gpt(gpt_prompt, random.random())
-            await asyncio.sleep(random.randint(5, 10))
-            bot.LAST_AUTO_REPLY_TIME = datetime.now()
-            await message.reply(gpt_response)
-    print(f"Processing request from: {str(message.author)}")
+        if not bot.IS_RESPONDING:
+            bot.IS_RESPONDING = True
+            await asyncio.sleep(random.randint(2, 5))
+            async with message.channel.typing():
+                gpt_prompt: str = utils.embellish_gpt_prompt(
+                    message_text, message_author_display_name
+                )
+                gpt_response = utils.get_gpt(gpt_prompt, random.random())
+                await asyncio.sleep(random.randint(5, 10))
+                bot.LAST_AUTO_REPLY_TIME = datetime.now()
+                await message.reply(gpt_response)
+            bot.IS_RESPONDING = False
     try:
         await bot.process_commands(message)
     except Exception as e:
