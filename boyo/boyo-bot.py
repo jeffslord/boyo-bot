@@ -4,7 +4,7 @@ from discord.ext import commands, tasks
 from dotenv import load_dotenv
 import random
 import boyo.utils as utils
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, timezone
 import asyncio
 
 load_dotenv()
@@ -22,7 +22,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 bot.LAST_AUTO_REPLY_TIME = datetime.now() - timedelta(minutes=1)
 bot.IS_RESPONDING = False
 
-DAILY_TIME = time(18, 0, 0)  # 6pm
+DAILY_TIME = time(18, 30, 0, 0, tzinfo=timezone("US/Eastern"))  # 6:30pm
 
 
 @bot.event
@@ -68,7 +68,9 @@ async def on_message(message):
 
 @tasks.loop(time=DAILY_TIME)  # Create the task
 async def daily_question():
-    channel = bot.get_channel(392511448171020300)  # private general channel
+    print("Sending daily message...")
+    channel = bot.get_channel(392511448171020300)
+    # channel = client.get_channel(392511448171020300)  # private general channel
     random_user = random.choice(channel.guild.members)
     gpt_prompt = f"say that you hope {random_user.display_name} had a good day, and then ask them a random thought provoking question."
     gpt_response = utils.get_gpt(gpt_prompt, random.random())
