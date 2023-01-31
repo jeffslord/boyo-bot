@@ -1,10 +1,10 @@
 import os
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from dotenv import load_dotenv
 import random
 import boyo.utils as utils
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import asyncio
 
 load_dotenv()
@@ -22,6 +22,8 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 bot.LAST_AUTO_REPLY_TIME = datetime.now() - timedelta(minutes=1)
 bot.IS_RESPONDING = False
 
+DAILY_TIME = time(18, 0, 0)  # 6pm
+
 
 @bot.event
 async def on_ready():
@@ -31,6 +33,7 @@ async def on_ready():
         f"{bot.user} is connected to the following guild:\n"
         f"{guild.name}(id: {guild.id})"
     )
+    daily_question.start()
 
 
 @bot.event
@@ -61,6 +64,16 @@ async def on_message(message):
         await bot.process_commands(message)
     except Exception as e:
         print(e)
+
+
+@tasks.loop(time=DAILY_TIME)  # Create the task
+async def daily_question():
+    channel = bot.get_channel(392511448171020300)  # private general channel
+    random_user = random.choice(channel.guild.members)
+    gpt_prompt = f"say that you hope {random_user.display_name} had a good day, and then ask them a random thought provoking question."
+    gpt_response = utils.get_gpt(gpt_prompt, random.random())
+    response = f"{random_user.mention} {gpt_response}"
+    await channel.send(response)
 
 
 @bot.command(name="boyo-bot")
