@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import random
 import boyo.utils as utils
 from datetime import datetime, timedelta
-import re
+import asyncio
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN", "")
@@ -26,11 +26,17 @@ bot.LAST_AUTO_REPLY_TIME = datetime.now() - timedelta(minutes=1)
 async def on_ready():
     print(f"{bot.user} has connected to Discord!")
     guild = discord.utils.get(bot.guilds, name=GUILD)
-    print(f"{bot.user} is connected to the following guild:\n" f"{guild.name}(id: {guild.id})")
+    print(
+        f"{bot.user} is connected to the following guild:\n"
+        f"{guild.name}(id: {guild.id})"
+    )
 
 
 @bot.event
 async def on_message(message):
+    message_author = message.author
+    message_author_display_name = message_author.display_name
+    message_text = message.content
     if message.author == bot.user:
         print(f"Skipping request from: {str(message.author)}")
         return
@@ -38,14 +44,12 @@ async def on_message(message):
     #     gpt_response = utils.get_gpt(message.content)
     #     await message.reply(gpt_response)
     else:
-        seconds_since_last_message = datetime.now() - bot.LAST_AUTO_REPLY_TIME
-        print(seconds_since_last_message)
-        if seconds_since_last_message.total_seconds() > 15:
-            gpt_message: str = "Reply to this: " + message.content
-            gpt_message = gpt_message.replace("boyo-bot", "you")
-            gpt_message = gpt_message.replace("boyo bot", "you")
-            gpt_message = gpt_message.replace("boyo", "you")
-            gpt_response = utils.get_gpt(gpt_message)
+        async with message.channel.typing():
+            gpt_prompt: str = utils.embellish_gpt_prompt(
+                message_text, message_author_display_name
+            )
+            gpt_response = utils.get_gpt(gpt_prompt, random.random())
+            await asyncio.sleep(random.randint(5, 10))
             bot.LAST_AUTO_REPLY_TIME = datetime.now()
             await message.reply(gpt_response)
     print(f"Processing request from: {str(message.author)}")
