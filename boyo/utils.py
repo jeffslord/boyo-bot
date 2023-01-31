@@ -89,6 +89,7 @@ def get_gpt(prompt: str, temperature: float = 0.6):
 def embellish_gpt_prompt(prompt: str, author_display_name: str):
     thank_author: bool = random.choices([True, False], weights=[3, 7])[0]
     ignore_question: bool = random.choices([True, False], weights=[1, 19])[0]
+    hate_response: bool = random.choices([True, False], weights=[1, 10])[0]
     built_prompt: str = ""
 
     if ignore_question:
@@ -98,5 +99,7 @@ def embellish_gpt_prompt(prompt: str, author_display_name: str):
     if thank_author:
         built_prompt = f"Thank {author_display_name} for talking to you. Then "
     built_prompt = f'Reply to: "{prompt}"'
+    if hate_response:
+        built_prompt = f"{built_prompt}. Reply like you hate me."
 
     return built_prompt
