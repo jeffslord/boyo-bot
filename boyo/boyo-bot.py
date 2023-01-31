@@ -44,6 +44,7 @@ async def on_message(message):
     #     gpt_response = utils.get_gpt(message.content)
     #     await message.reply(gpt_response)
     else:
+        await asyncio.sleep(random.randint(2, 5))
         async with message.channel.typing():
             gpt_prompt: str = utils.embellish_gpt_prompt(
                 message_text, message_author_display_name
