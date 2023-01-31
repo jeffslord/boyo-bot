@@ -6,6 +6,8 @@ import random
 import boyo.utils as utils
 from datetime import datetime, timedelta, time, timezone
 import asyncio
+import pytz
+
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN", "")
@@ -22,7 +24,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 bot.LAST_AUTO_REPLY_TIME = datetime.now() - timedelta(minutes=1)
 bot.IS_RESPONDING = False
 
-DAILY_TIME = time(18, 30, 0, 0, tzinfo=timezone("US/Eastern"))  # 6:30pm
+DAILY_TIME = time(18, 30, 0, 0, tzinfo=pytz.timezone("US/Eastern"))  # 6:30pm
 
 
 @bot.event
