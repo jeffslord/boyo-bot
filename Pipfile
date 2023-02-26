@@ -9,6 +9,9 @@ python-dotenv = "*"
 requests = "*"
 openai = "*"
 pytz = "*"
+nltk = "*"
+chatgpt = "*"
+revchatgpt = "*"
 
 [dev-packages]
 flake8 = "*"
@@ -19,3 +22,6 @@ python_version = "3"
 
 [pipenv]
 allow_prereleases = true
+
+[scripts]
+test = "python3 boyo/utils.py"

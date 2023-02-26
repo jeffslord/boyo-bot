@@ -3,6 +3,9 @@ import os
 import openai
 import logging
 import random
+import nltk
+from revChatGPT.V1 import AsyncChatbot, Chatbot
+import asyncio
 
 DEEPAI_API = os.getenv("DEEPAI_API", "")
 OPEN_API = os.getenv("OPEN_API", "")
@@ -66,9 +69,9 @@ def text_to_image(text):
 def get_gpt(prompt: str, temperature: float = 0.6):
     logging.info(f"Generating GPT response with temperature: {temperature}")
     text_response: str = ""
-    prompt = prompt.replace("boyo-bot", "you")
-    prompt = prompt.replace("boyo bot", "you")
-    prompt = prompt.replace("boyo", "you")
+    # prompt = prompt.replace("boyo-bot", "you")
+    # prompt = prompt.replace("boyo bot", "you")
+    # prompt = prompt.replace("boyo", "you")
     try:
         completion = openai.Completion.create(
             engine="text-davinci-003",
@@ -86,20 +89,71 @@ def get_gpt(prompt: str, temperature: float = 0.6):
     return text_response
 
 
-def embellish_gpt_prompt(prompt: str, author_display_name: str):
-    thank_author: bool = random.choices([True, False], weights=[3, 7])[0]
-    ignore_question: bool = random.choices([True, False], weights=[1, 19])[0]
-    hate_response: bool = random.choices([True, False], weights=[1, 10])[0]
-    built_prompt: str = ""
+def get_boyo_context():
+    base = get_boyo_context_base()
+    context: str = f"{base} His full name is Boyo-Bot, but goes by Boyo. His father and creator is Jeff."
+    return context
 
-    if ignore_question:
-        built_prompt = "reply saying you don't feel like talking to them"
-        return built_prompt
 
-    if thank_author:
-        built_prompt = f"Thank {author_display_name} for talking to you. Then "
-    built_prompt = f'Reply to: "{prompt}"'
-    if hate_response:
-        built_prompt = f"{built_prompt}. Reply like you hate me."
+def get_boyo_context_base():
+    context = "Boyo thinks he is a real person. He gets very angry when someone calls him a chatbot or ai."
+    return context
 
-    return built_prompt
+
+def record_memory(username: str, text: str, bot):
+    try:
+        memory_string = f"{username}:{text}"
+        bot.MEMORY.append(memory_string)
+        with open("/memory.txt", "a") as f:
+            f.write(f"{memory_string}\n")
+    except Exception as e:
+        print(e)
+
+
+# print(os.getenv("CHATGPT_ACCESS_TOKEN"))
+
+
+async def stream_gpt_response(
+    prompt,
+    gpt_conversation_id="",
+    gpt_parent_id="",
+    discord_parent_message="",
+):
+    chatbot = Chatbot(
+        config={
+            "access_token": os.getenv("CHATGPT_ACCESS_TOKEN", ""),
+            "conversation_id": gpt_conversation_id,
+        }
+    )
+    prev_text = ""
+    current_message = None
+    _conversation_id = gpt_conversation_id
+    _parent_id = gpt_parent_id
+    reply_counter = 0
+    # async for data in chatbot.ask(prompt, gpt_conversation_id, gpt_parent_id):
+    print("Message")
+    try:
+        for data in chatbot.ask(prompt, _conversation_id):
+            print(data)
+            # message = data["message"][len(prev_text) :]
+            # print(message)
+            prev_text = data["message"]
+            # print("prev_text = " + prev_text)
+
+            _conversation_id = data["conversation_id"]
+            _parent_id = data["parent_id"]
+            if len(prev_text) == 0:
+                continue
+            if not current_message:
+                current_message = await discord_parent_message.reply(prev_text)
+            else:
+                if reply_counter % 2 == 0:
+                    await current_message.edit(content=prev_text)
+            reply_counter += 1
+        await current_message.edit(content=prev_text)
+    except Exception as e:
+        await discord_parent_message.reply("I think I broke.")
+    return _conversation_id, _parent_id
+
+
+# asyncio.run(stream_gpt_response("test message", "f635ba8d-8045-48a2-bd60-a95650cf7fc0"))

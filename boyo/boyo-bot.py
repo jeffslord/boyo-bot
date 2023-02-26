@@ -7,6 +7,7 @@ import boyo.utils as utils
 from datetime import datetime, timedelta, time, timezone
 import asyncio
 import pytz
+import logging
 
 
 load_dotenv()
@@ -23,6 +24,9 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 bot.LAST_AUTO_REPLY_TIME = datetime.now() - timedelta(minutes=1)
 bot.IS_RESPONDING = False
+bot.MEMORY = []
+bot.GPT_CONVERSATION_ID = "f635ba8d-8045-48a2-bd60-a95650cf7fc0"
+bot.GPT_PARENT_ID = ""
 
 DAILY_TIME = time(18, 30, 0, 0, tzinfo=pytz.timezone("US/Eastern"))  # 6:30pm
 
@@ -35,32 +39,49 @@ async def on_ready():
         f"{bot.user} is connected to the following guild:\n"
         f"{guild.name}(id: {guild.id})"
     )
+    with open("/memory.txt", "r") as f:
+        memory_text = f.read()
+        bot.MEMORY = memory_text.split("\n")
     # daily_question.start()
 
 
 @bot.event
 async def on_message(message):
+    if message.channel.id != 1078801607589892116:
+        return
     message_author = message.author
     message_author_display_name = message_author.display_name
-    message_text = message.content
+    message_text: str = message.content
+    message_prompt = f"{message_author_display_name}: {message_text}\nBoyo-Bot: "
     if message.author == bot.user:
         print(f"Skipping request from: {str(message.author)}")
         return
     # elif "Lottli" in str(message.author.name):
     #     gpt_response = utils.get_gpt(message.content)
     #     await message.reply(gpt_response)
-    elif "boyo" in message_text:
+    elif not message_text.lower().startswith("!skip"):
         if not bot.IS_RESPONDING:
             bot.IS_RESPONDING = True
-            await asyncio.sleep(random.randint(2, 5))
+            await asyncio.sleep(random.randint(1, 2))
             async with message.channel.typing():
-                gpt_prompt: str = utils.embellish_gpt_prompt(
-                    message_text, message_author_display_name
+                # gpt_memory: str = "\n".join(bot.MEMORY)
+                # boyo_context = utils.get_boyo_context()
+                # gpt_prompt = f"{boyo_context}\n{gpt_memory}\n{message_prompt}\nBoyo:"
+                # gpt_response = utils.get_gpt(gpt_prompt, random.random())
+                # gpt_memory_response: str = f"Boyo:{gpt_response}"
+                # logging.info("-----Responding to-----")
+                # logging.info(message_prompt)
+                # logging.info("-----Response-----")
+                # logging.info(gpt_memory_response + "\n\n")
+                # utils.record_memory(message_author_display_name, message_text, bot)
+                # utils.record_memory("Boyo", gpt_response, bot)
+                # await asyncio.sleep(random.randint(5, 10))
+                gpt_conversation_id, gpt_parent_id = await utils.stream_gpt_response(
+                    message_prompt, bot.GPT_CONVERSATION_ID, bot.GPT_PARENT_ID, message
                 )
-                gpt_response = utils.get_gpt(gpt_prompt, random.random())
-                await asyncio.sleep(random.randint(5, 10))
+                bot.GPT_CONVERSATION_ID = gpt_conversation_id
+                bot.GPT_PARENT_ID = gpt_parent_id
                 bot.LAST_AUTO_REPLY_TIME = datetime.now()
-                await message.reply(gpt_response)
             bot.IS_RESPONDING = False
     try:
         await bot.process_commands(message)

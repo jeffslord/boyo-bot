@@ -6,3 +6,6 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    volumes:
+      - ./data/memory.txt:/memory.txt
+      - ./config.json:$HOME/.config/revChatGPT/config.json
